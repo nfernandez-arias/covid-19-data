@@ -20,14 +20,16 @@ states[ , date := as.Date(date)]
 ggplot(data = states[], aes(x = date, y = log(cases), group = state)) +
   geom_line() +
   facet_wrap(~state) +
+  labs(title = "Coronavirus cases by state") + 
   theme(axis.text.x = element_text(angle = 90))
 
 
-ggsave("US_states_corona_cases.pdf",plot = last_plot(), width = 11, height = 8, units = "in")
+ggsave("US_states_corona_cases.pdf",plot = last_plot(), width = 14, height = 10, units = "in")
 
 ggplot(data = states[state %in% BigStates], aes(x = date, y = log(cases), group = state)) +
   geom_line() +
   facet_wrap(~state) +
+  labs(title = "Coronavirus cases by major US state") +
   theme(axis.text.x = element_text(angle = 90))
 
 
@@ -39,15 +41,32 @@ ggsave("US_bigstates_corona_cases.pdf",plot = last_plot(), width = 11, height = 
 
 counties <- fread("us-counties.csv")
 
+counties[ , countystate := paste(county,state, sep = ", ")]
 
-BigCounties <- c("New York City","San Francisco","Los Angeles","Cook","King","Mercer","Wayne","")
+
+BigCounties <- c(c("New York City, New York"),c("San Francisco, California"),
+                 c("Los Angeles, California"),
+                 c("Cook, Illinois"),
+                 c("King, Washington"),
+                 c("Mercer, New Jersey"),
+                 c("Bergen, New Jersey"),
+                 c("Wayne, Texas"),
+                 c("Suffolk, Massachusetts"),
+                 c("Philadelphia, Pennsylvania"),
+                 c("Wayne, Michigan"),
+                 c("Miami-Dade, Florida"),
+                 c("Orleans, Louisiana"))
+
 
 counties[ , date := as.Date(date)]
 
-ggplot(data = counties[county %in% BigCounties & state %in% BigStates], aes(x = date, y = log(cases), group = county)) +
+ggplot(data = counties[countystate %in% BigCounties], aes(x = date, y = log(cases), group = county)) +
   geom_line() +
-  facet_wrap(~county) +
-  theme(axis.text.x = element_text(angle = 90))
+  facet_wrap(~countystate) +
+  labs(title = "Coronavirus cases by major US county",
+       subtitle = "Cook = Chicago, King = Seattle, Suffolk = Boston, Wayne = Detroit") + 
+  theme(axis.text.x = element_text(angle = 90)) 
 
 
 ggsave("US_counties_corona_cases.pdf",plot = last_plot(), width = 11, height = 8, units = "in")
+

@@ -36,7 +36,7 @@ ggplot(data = states[state %in% BigStates], aes(x = date, y = log(cases), group 
 ggsave("US_bigstates_corona_cases.pdf",plot = last_plot(), width = 11, height = 8, units = "in")
 
 
-
+              
 
 
 counties <- fread("us-counties.csv")

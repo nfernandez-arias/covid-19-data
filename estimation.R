@@ -143,6 +143,18 @@ ggplot(data = states[], aes(x = date, y = impliedR_asymp, group = state)) +
 
 ggsave("US_states_corona_cases_impliedRasymp_adjusted.pdf",plot = last_plot(), width = 18, height = 13, units = "in")
 
+states[ , impliedT_asymp_standardized := (impliedT_asymp - mean(na.omit(impliedT_asymp)) ) / sd(na.omit(impliedT_asymp)), by = state]
+
+ggplot(data = states[], aes(x = date, y = impliedT_asymp_standardized, group = state)) +
+  geom_line() +
+  facet_wrap(~state) +
+  labs(title = "Implied daily T") + 
+  
+  theme(axis.text.x = element_text(angle = 90))
+
+
+ggsave("US_states_corona_cases_impliedTasymp_adjusted.pdf",plot = last_plot(), width = 18, height = 13, units = "in")
+
 
 ggplot(data = states[], aes(x = date, y = log(deaths), group = state)) +
   geom_line() +

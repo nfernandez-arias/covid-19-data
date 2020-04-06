@@ -61,10 +61,13 @@ asymp <- function(newCases,newAsymp,idx) {
 
 }
 
-symp <- function(newCases,newAsymp,newDeaths,idx) {
+symp <- function(cases,newCases,newAsymp,deaths,newDeaths,idx) {
   
   out <- vector(mode = "numeric", length = length(idx))
   
+  newCases[1] <- cases[1]
+  newDeaths[1] <- deaths[1]
+    
   out[1] <- newCases[1]
   
   for (i in 2:length(idx)) {
@@ -80,6 +83,7 @@ symp <- function(newCases,newAsymp,newDeaths,idx) {
 }
 
 states[ , asymptomatics := asymp(newCasesRaw,newAsymptomaticRaw,index), by = state]
+states[ , cases_ongoing := symp(cases,newCasesRaw,newAsymptomaticRaw,deaths,newDeathsRaw,index), by = state]
 
 states[ , impliedR_asymp := newAsymptomaticRaw / (f * shift(asymptomatics)), by = state]
 
@@ -96,7 +100,7 @@ ggsave("US_states_corona_cases.pdf",plot = last_plot(), width = 14, height = 10,
 
 ggplot(data = states[], aes(x = date, group = state)) +
   geom_line(aes(y = log(asymptomatics), color = "Asymptomatics")) +
-  geom_line(aes(y = log(cases), color = "Symptomatics")) + 
+  geom_line(aes(y = log(cases_ongoing), color = "Symptomatics")) + 
   facet_wrap(~state) +
   labs(title = "Coronavirus cases (asymptomatic) by state") + 
   theme(axis.text.x = element_text(angle = 90))
@@ -136,7 +140,7 @@ ggplot(data = states[], aes(x = date, y = impliedR_asymp, group = state)) +
   geom_line() +
   facet_wrap(~state) +
   labs(title = "Implied daily R") + 
-  ylim(0,1) + 
+  ylim(0,3) + 
   theme(axis.text.x = element_text(angle = 90))
 
 

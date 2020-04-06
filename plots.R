@@ -9,6 +9,12 @@ library(gridExtra)
 
 setwd("~/nfernand@princeton.edu/PhD - Thesis/Research/covid-19-data")
 
+#  Parameters for state space estimation of asymptomatic daily R
+
+f0 <- 0.9  # initial fraction asymptomatic
+f <- 0.9 # fraction of new cases that are asymptomatic
+r <- 0.05 # fraction of cases that resolve each day
+
 states <- fread("us-states.csv")
 
 setkey(states,state,date)
@@ -31,16 +37,10 @@ states[ , newDeaths := logDeaths - shift(logDeaths), by = state]
 states[ , currentCases := cases - deaths]
 states[ , newCasesAdjusted := newCasesRaw / shift(currentCases), by = state]
 
-#  Constructing state space estimation of asymptomatic daily R
-
-f0 <- 0.5  # initial fraction asymptomatic
-f <- 0.5 # fraction of new cases that are asymptomatic
-r <- 0.05 # fraction of cases that resolve each day
-
 # Con
 states[ , newAsymptomaticRaw := newCasesRaw * (f / (1-f)) ]
 
-states[states[ , .I[1], by = state], newAsymptomaticRaw := (f0 / (1-f0)) * cases]
+states[states[ , .I[1], by = state]$V1, newAsymptomaticRaw := (f0 / (1-f0)) * cases]
 
 
 asymp <- function(newCases,newAsymp,idx) {
@@ -86,6 +86,9 @@ states[ , asymptomatics := asymp(newCasesRaw,newAsymptomaticRaw,index), by = sta
 states[ , cases_ongoing := symp(cases,newCasesRaw,newAsymptomaticRaw,deaths,newDeathsRaw,index), by = state]
 
 states[ , impliedR_asymp := newAsymptomaticRaw / (f * shift(asymptomatics)), by = state]
+
+
+fwrite(states,"statesModified.csv")
 
 
 
@@ -216,6 +219,8 @@ counties[ , currentCases := cases - deaths]
 counties[ , newCasesAdjusted := newCasesRaw / shift(currentCases), by = countystate]
 
 
+
+
 ggplot(data = counties[countystate %in% BigCounties], aes(x = date, y = log(cases), group = county)) +
   geom_line() +
   facet_wrap(~countystate) +
@@ -247,4 +252,9 @@ ggsave("US_counties_corona_cases_impliedR_adjusted.pdf",plot = last_plot(), widt
 
 
 ggsave("US_counties_corona_deaths.pdf",plot = last_plot(), width = 11, height = 8, units = "in")
+
+
+
+
+
 

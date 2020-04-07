@@ -18,6 +18,14 @@ r <- 0.1 # fraction of cases that resolve each day
 states <- fread("us-states.csv")
 
 population <- fread("nst-est2019-alldata.csv")
+area <- fread("statesAreas.csv")
+
+setkey(area,State)
+setkey(states,state)
+
+states <- area[states]
+
+setnames(states,"State","state")
 
 setkey(population,STATE)
 setkey(states,fips)

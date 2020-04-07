@@ -17,7 +17,7 @@ f <- 0.7 # fraction of new cases that are asymptomatic
 r <- 0.1 # fraction of cases that resolve each day
 
 # Factor by which state-specific R is adjusted
-factor <- 0.5
+factor <- 1
 
 states <- fread("statesModified.csv")
 
@@ -41,14 +41,14 @@ Rtable[ , necessaryFactor:= necessaryR / impliedR_last]
 
 setkey(Rtable,state)
 setkey(Ttable,state)
-#d = (deathRate / (1 - deathRate)) * r # Projected death rate per day  
+d = 0.5 * (deathRate / (1 - deathRate)) * r # Projected death rate per day  
 
-d = (0.005 / (1 - 0.005)) * r # Projected death rate per day  
+#d = (0.005 / (1 - 0.005)) * r # Projected death rate per day  
 
 states[ , date := as.Date(date)]
 
 # Extend dataset for each state until end of projection period
-temp <- states[ , .(date = seq.Date(min(date),as.Date("2020-12-31"), by = "day")), by = state]
+temp <- states[ , .(date = seq.Date(min(date),as.Date("2021-04-01"), by = "day")), by = state]
 
 
 setkey(temp,state,date)
@@ -64,6 +64,7 @@ states <- Ttable[states]
 setnames(states,"POPESTIMATE2019","population")
 states[ , population := na.locf(population), by = state]
 states[ , STATE := na.locf(STATE), by = state]
+states[ , Area := na.locf(Area), by = state]
 # Make projections
 
 project <- function(asymptomatics,cases,deaths,vulnerablePopulation,impliedT,factor)  {
@@ -86,10 +87,10 @@ project <- function(asymptomatics,cases,deaths,vulnerablePopulation,impliedT,fac
   
   for (i in iMin:length(asymptomatics)) {
     
-    projectedNewAsymptomatics[i] <- f * factor * impliedT[i] * projectedVulnerablePopulation[i-1] * projectedAsymptomatics[i-1]
+    projectedNewAsymptomatics[i] <- f * factor * impliedT[i] * (projectedVulnerablePopulation[i-1]) * projectedAsymptomatics[i-1]
     projectedAsymptomatics[i] <- projectedAsymptomatics[i-1] * (1-r) + projectedNewAsymptomatics[i]
     
-    projectedNewCases[i] <- (1-f) * factor * impliedT[i] * projectedVulnerablePopulation[i-1] * projectedAsymptomatics[i-1]
+    projectedNewCases[i] <- (1-f) * factor * impliedT[i] * (projectedVulnerablePopulation[i-1]) * projectedAsymptomatics[i-1]
     projectedCases[i] <- projectedCases[i-1] * (1-r) + projectedNewCases[i]
     
     projectedNewDeaths[i] <- d * projectedCases[i]
@@ -115,9 +116,18 @@ states[ , c("projectedNewAsymptomatics_03","projectedAsymptomatics_03","projecte
 states[ projectedCases == 0, projectedCases := NA]
 states[ projectedAsymptomatics == 0, projectedAsymptomatics := NA]
 states[ projectedDeaths == 0, projectedDeaths := NA]
+states[ projectedVulnerablePopulation == 0, projectedVulnerablePopulation := NA]
 
 states[ cases_ongoing == 0, cases_ongoing := NA]
 states[ asymptomatics == 0, asymptomatics := NA]
+states[ deaths == 0, deaths := NA]
+states[, cumulativeInfected := population - vulnerablePopulation]
+
+states[ , projectedCumulativeInfected := population - projectedVulnerablePopulation]
+states[ , projectedCumulativeInected_10 := population - projectedVulnerablePopulation_10]
+states[ , projectedCumulativeInected_07 := population - projectedVulnerablePopulation_07]
+states[ , projectedCumulativeInected_05 := population - projectedVulnerablePopulation_05]
+states[ , projectedCumulativeInected_03 := population - projectedVulnerablePopulation_03]
 
 #states[ projectedDeaths == 0.0, deaths := NA]
 
@@ -147,7 +157,7 @@ ggplot(UStotals, aes(x = date)) +
   xlab("Date") + 
   theme(axis.text.x = element_text(angle = 90))
 
-ggsave("US_corona_projections.pdf",plot = last_plot(), width = 5, height = 6, units = "in")
+ggsave("US_corona_projections.pdf",plot = last_plot(), width = 10, height = 6, units = "in")
 
 
 ggplot(states, aes(x = date)) + 
@@ -157,6 +167,14 @@ ggplot(states, aes(x = date)) +
   theme(axis.text.x = element_text(angle = 90))
 
 ggsave("US_states_corona_cases_projections.pdf",plot = last_plot(), width = 18, height = 13, units = "in")
+
+ggplot(states, aes(x = date)) + 
+  geom_line(aes(y = log(cumulativeInfected), linetype = "Cumulative infected (actual, estimated)")) + 
+  geom_line(aes(y = log(projectedCumulativeInfected), linetype = "Cumulative infected (projected)")) + 
+  facet_wrap(~state) + 
+  theme(axis.text.x = element_text(angle = 90))
+
+ggsave("US_states_corona_infected_projections.pdf",plot = last_plot(), width = 18, height = 13, units = "in")
 
 ggplot(states, aes(x = date)) + 
   geom_line(aes(y = log(asymptomatics), linetype = "Asymptomatics (actual, estimated)")) + 
@@ -181,7 +199,7 @@ ggplot(Rtable[ , .(necessaryFactor)] , aes(x = necessaryFactor)) +
   geom_histogram(bins = 50) + 
   stat_density(geom = "line")
 
-ggsave("necessaryR_adjustment.pdf", plot = last_plot(), width = 5, height = 6, units = "in")
+ggsave("necessaryR_adjustment.pdf", plot = last_plot(), width = 10, height = 6, units = "in")
 
 
 
@@ -238,11 +256,15 @@ ggplot(UStotals[variable %in% casesVariables], aes(x = date, y = log(value), lin
   geom_line() + 
   labs(title = "Cases")
 
+ggsave("US_corona_cases_projections.pdf", plot = last_plot(), width = 10, height = 6, units = "in")
+
 ggplot(UStotals[variable %in% vulnerablePopulationVariables], aes(x = date, y = log(value), linetype = variable)) + 
   geom_line()
 
 ggplot(UStotals[variable %in% cumulativeInfectedVariables], aes(x = date, y = log(value), linetype = variable)) + 
   geom_line()
+
+ggsave("US_corona_infections_projections.pdf", plot = last_plot(), width = 10, height = 6, units = "in")
 
 ggplot(UStotals[variable %in% asymptomaticsVariables], aes(x = date, y = log(value), linetype = variable)) + 
   geom_line()
@@ -250,3 +272,4 @@ ggplot(UStotals[variable %in% asymptomaticsVariables], aes(x = date, y = log(val
 ggplot(UStotals[variable %in% deathsVariables], aes(x = date, y = log(value), linetype = variable)) + 
   geom_line()
 
+ggsave("US_corona_deaths_projections.pdf", plot = last_plot(), width = 10, height = 6, units = "in")

@@ -41,9 +41,9 @@ Rtable[ , necessaryFactor:= necessaryR / impliedR_last]
 
 setkey(Rtable,state)
 setkey(Ttable,state)
-d = 0.5 * (deathRate / (1 - deathRate)) * r # Projected death rate per day  
+#d = 0.5 * (deathRate / (1 - deathRate)) * r # Projected death rate per day        
 
-#d = (0.005 / (1 - 0.005)) * r # Projected death rate per day  
+d = (0.003 / (1 - 0.003)) * r # Projected death rate per day  
 
 states[ , date := as.Date(date)]
 
@@ -246,30 +246,72 @@ deathsVariables <- c("deaths","projectedDeaths_10","projectedDeaths_07","project
 vulnerablePopulationVariables <- c("vulnerablePopulation","projectedVulnerablePopulation_10","projectedVulnerablePopulation_07","projectedVulnerablePopulation_05","projectedVulnerablePopulation_03")
 cumulativeInfectedVariables <- c("cumulativeInfected","projectedCumulativeInfected_10","projectedCumulativeInfected_07","projectedCumulativeInfected_05","projectedCumulativeInfected_03")
 
+variables_raw <- c("cases_ongoing","asymptomatics","deaths","vulnerablePopulation","cumulativeInfected")
+variables_10 <- c("projectedCases_10","projectedAsymptomatics_10","projectedDeaths_10","projectedVulnerablePopulation_10","projectedCumulativeInfected_10")
+variables_07 <- c("projectedCases_07","projectedAsymptomatics_07","projectedDeaths_07","projectedVulnerablePopulation_07","projectedCumulativeInfected_07")
+variables_05 <- c("projectedCases_05","projectedAsymptomatics_05","projectedDeaths_05","projectedVulnerablePopulation_05","projectedCumulativeInfected_05")
+variables_03 <- c("projectedCases_03","projectedAsymptomatics_03","projectedDeaths_03","projectedVulnerablePopulation_03","projectedCumulativeInfected_03")
+
 UStotals[ variable %in% casesVariables, variableType := "Cases"]
 UStotals[ variable %in% asymptomaticsVariables, variableType := "Asymptomatics"]
 UStotals[ variable %in% deathsVariables, variableType := "Deaths"]
 UStotals[ variable %in% vulnerablePopulationVariables, variableType := "Vulnerable Population"]
 UStotals[ variable %in% cumulativeInfectedVariables, variableType := "Cumulative infected"]
 
-ggplot(UStotals[variable %in% casesVariables], aes(x = date, y = log(value), linetype = variable)) + 
+UStotals[ variable %in% variables_raw, projectionType := "Data"]
+UStotals[ variable %in% variables_10, projectionType := "Projection: 100% current transmission"]
+UStotals[ variable %in% variables_07, projectionType := "Projection: 70% current transmission"]
+UStotals[ variable %in% variables_05, projectionType := "Projection: 50% current transmission"]
+UStotals[ variable %in% variables_03, projectionType := "Projection: 30% current transmission"]
+
+p1 <- ggplot(UStotals[variable %in% casesVariables], aes(x = date, y = log(value), linetype = variable)) + 
   geom_line() + 
   labs(title = "Cases")
 
-ggsave("US_corona_cases_projections.pdf", plot = last_plot(), width = 10, height = 6, units = "in")
+ggsave("US_corona_cases_projections.pdf", plot = p1, width = 10, height = 6, units = "in")
+
+p2 <- ggplot(UStotals[variable %in% asymptomaticsVariables], aes(x = date, y = log(value), linetype = variable)) + 
+  geom_line()
+
+ggsave("US_corona_asymptomatics_projections.pdf", plot = p2, width = 10, height = 6, units = "in")
 
 ggplot(UStotals[variable %in% vulnerablePopulationVariables], aes(x = date, y = log(value), linetype = variable)) + 
   geom_line()
 
-ggplot(UStotals[variable %in% cumulativeInfectedVariables], aes(x = date, y = log(value), linetype = variable)) + 
+p3 <- ggplot(UStotals[variable %in% cumulativeInfectedVariables], aes(x = date, y = log(value), linetype = variable)) + 
+  geom_line()
+  
+ggsave("US_corona_infections_projections.pdf", plot = p3, width = 10, height = 6, units = "in")
+
+
+p4 <- ggplot(UStotals[variable %in% deathsVariables], aes(x = date, y = log(value), linetype = variable)) + 
   geom_line()
 
-ggsave("US_corona_infections_projections.pdf", plot = last_plot(), width = 10, height = 6, units = "in")
+ggsave("US_corona_deaths_projections.pdf", plot = p4, width = 10, height = 6, units = "in")
 
-ggplot(UStotals[variable %in% asymptomaticsVariables], aes(x = date, y = log(value), linetype = variable)) + 
-  geom_line()
+UStotals[ , projectionType := factor(projectionType, levels = c("Data","Projection: 100% current transmission","Projection: 70% current transmission",
+                                                                "Projection: 50% current transmission","Projection: 30% current transmission"))]
 
-ggplot(UStotals[variable %in% deathsVariables], aes(x = date, y = log(value), linetype = variable)) + 
-  geom_line()
+ggplot(UStotals[ variable %in% c(casesVariables,asymptomaticsVariables,cumulativeInfectedVariables,deathsVariables)], aes(x = date, y = log(value), linetype = factor(projectionType), color = variableType)) + 
+  geom_line() +  
+  labs(title = "US total coronavirus projections",
+       subtitle = "Four lockdown scenarios, logarithmic terms") + 
+  xlab("Date") + 
+  ylab("Log(# of people)") + 
+  #geom_point(size = 0.0001, aes(shape = projectionType)) + 
+  facet_wrap(~variableType) + 
+  theme(axis.text.x = element_text(angle = 90))
 
-ggsave("US_corona_deaths_projections.pdf", plot = last_plot(), width = 10, height = 6, units = "in")
+ggsave("US_corona_all_projections_logterms.pdf", plot = last_plot(), width = 12, height = 8, units = "in")
+
+ggplot(UStotals[ variable %in% c(casesVariables,asymptomaticsVariables,cumulativeInfectedVariables,deathsVariables)], aes(x = date, y = value, linetype = factor(projectionType), color = variableType)) + 
+  geom_line() +  
+  labs(title = "US total coronavirus projections",
+       subtitle = "Four lockdown scenarios, logarithmic terms") + 
+  xlab("Date") + 
+  ylab("# of people") + 
+  #geom_point(size = 0.0001, aes(shape = projectionType)) + 
+  facet_wrap(~variableType) + 
+  theme(axis.text.x = element_text(angle = 90))
+
+ggsave("US_corona_all_projections_raw.pdf", plot = last_plot(), width = 12, height = 8, units = "in")

@@ -16,6 +16,10 @@ f0 <- 0.95  # initial fraction asymptomatic
 f <- 0.7 # fraction of new cases that are asymptomatic
 r <- 0.1 # fraction of cases that resolve each day
 
+worsenFrac <- 0.2 # fraction of asymnptomatic cases that become symptomatic
+w <- ((worsenFrac) / (1- worsenFrac)) * r
+
+
 # Factor by which state-specific R is adjusted
 factor <- 1
 
@@ -41,9 +45,9 @@ Rtable[ , necessaryFactor:= necessaryR / impliedR_last]
 
 setkey(Rtable,state)
 setkey(Ttable,state)
-#d = 0.5 * (deathRate / (1 - deathRate)) * r # Projected death rate per day        
+d =   (deathRate / (1 - deathRate)) * r # Projected death rate per day        
 
-d = (0.003 / (1 - 0.003)) * r # Projected death rate per day  
+#d = (0.003 / (1 - 0.003)) * r # Projected death rate per day  
 
 states[ , date := as.Date(date)]
 
@@ -88,9 +92,9 @@ project <- function(asymptomatics,cases,deaths,vulnerablePopulation,impliedT,fac
   for (i in iMin:length(asymptomatics)) {
     
     projectedNewAsymptomatics[i] <- f * factor * impliedT[i] * (projectedVulnerablePopulation[i-1]) * projectedAsymptomatics[i-1]
-    projectedAsymptomatics[i] <- projectedAsymptomatics[i-1] * (1-r) + projectedNewAsymptomatics[i]
+    projectedAsymptomatics[i] <- projectedAsymptomatics[i-1] * (1-r - w) + projectedNewAsymptomatics[i]
     
-    projectedNewCases[i] <- (1-f) * factor * impliedT[i] * (projectedVulnerablePopulation[i-1]) * projectedAsymptomatics[i-1]
+    projectedNewCases[i] <- (w + (1-f) * factor * impliedT[i] * (projectedVulnerablePopulation[i-1])) * projectedAsymptomatics[i-1]
     projectedCases[i] <- projectedCases[i-1] * (1-r) + projectedNewCases[i]
     
     projectedNewDeaths[i] <- d * projectedCases[i]
@@ -292,19 +296,20 @@ ggsave("US_corona_deaths_projections.pdf", plot = p4, width = 10, height = 6, un
 UStotals[ , projectionType := factor(projectionType, levels = c("Data","Projection: 100% current transmission","Projection: 70% current transmission",
                                                                 "Projection: 50% current transmission","Projection: 30% current transmission"))]
 
-ggplot(UStotals[ variable %in% c(casesVariables,asymptomaticsVariables,cumulativeInfectedVariables,deathsVariables)], aes(x = date, y = log(value), linetype = factor(projectionType), color = variableType)) + 
+ggplot(UStotals[ variable %in% c(casesVariables,asymptomaticsVariables,cumulativeInfectedVariables,deathsVariables)], aes(x = date, y = log(value), linetype = factor(projectionType))) + 
   geom_line() +  
   labs(title = "US total coronavirus projections",
        subtitle = "Four lockdown scenarios, logarithmic terms") + 
   xlab("Date") + 
   ylab("Log(# of people)") + 
+  ylim(0,NA) + 
   #geom_point(size = 0.0001, aes(shape = projectionType)) + 
   facet_wrap(~variableType) + 
   theme(axis.text.x = element_text(angle = 90))
 
 ggsave("US_corona_all_projections_logterms.pdf", plot = last_plot(), width = 12, height = 8, units = "in")
 
-ggplot(UStotals[ variable %in% c(casesVariables,asymptomaticsVariables,cumulativeInfectedVariables,deathsVariables)], aes(x = date, y = value, linetype = factor(projectionType), color = variableType)) + 
+ggplot(UStotals[ variable %in% c(casesVariables,asymptomaticsVariables,cumulativeInfectedVariables,deathsVariables)], aes(x = date, y = value, linetype = factor(projectionType))) + 
   geom_line() +  
   labs(title = "US total coronavirus projections",
        subtitle = "Four lockdown scenarios, logarithmic terms") + 

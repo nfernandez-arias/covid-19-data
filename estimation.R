@@ -15,6 +15,10 @@ f0 <- 0.95  # initial fraction asymptomatic
 f <- 0.7 # fraction of new cases that are asymptomatic
 r <- 0.1 # fraction of cases that resolve each day
 
+worsenFrac <- 0.2 # fraction of asymnptomatic cases that become symptomatic
+w <- ((worsenFrac) / (1- worsenFrac)) * r
+
+
 states <- fread("us-states.csv")
 
 population <- fread("nst-est2019-alldata.csv")
@@ -61,7 +65,7 @@ states[states[ , .I[1], by = state]$V1, newAsymptomaticRaw := (f0 / (1-f0)) * ca
 filter <- function(cases,newCases,newAsymp,deaths,newDeaths,idx) {
   
   asymp <- vector(mode = "numeric", length = length(idx))
-  cases <- vector(mode = "numeric", length = length(idx))
+  cases_ongoing <- vector(mode = "numeric", length = length(idx))
   immune <- vector(mode = "numeric", length = length(idx))
     
   asymp[1] <- newAsymp[1]
@@ -70,15 +74,18 @@ filter <- function(cases,newCases,newAsymp,deaths,newDeaths,idx) {
   
   for (i in 2:length(idx)) {
     
-      discountFactor <- (1-r)^(i-idx[1:i-1])
+      discountFactor1 <- (1-r)^(i-idx[1:i-1])
+      discountFactor2 <- (1-w)^(i-idx[1:i-1])
+    
       
-      asymp[i] <- sum( newAsymp[1:i-1] * discountFactor) + newAsymp[i]
-      cases[i] <- sum( (newCases[1:i-1] - newDeaths[1:i-1]) * discountFactor) + newCases[i]
-      immune[i] <- sum( (newAsymp[1:i-1] + (newCases[1:i-1] - newDeaths[1:i-1])) * (1- discountFactor) )
+      immune[i] <- immune[i-1] + r * (asymp[i-1] + cases_ongoing[i-1])  
+      asymp[i] <- asymp[i-1] * (1 - r - w) + newAsymp[i]
+      cases_ongoing[i] <- cases_ongoing[i-1] * (1-r) - newDeaths[i-1] + asymp[i-1] * w + newCases[i]
+
     
   }
   
-  return(list(asymp,cases,immune))
+  return(list(asymp,cases_ongoing,immune))
 
 }
 

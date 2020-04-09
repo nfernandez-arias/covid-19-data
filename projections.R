@@ -45,7 +45,7 @@ Rtable[ , necessaryFactor:= necessaryR / impliedR_last]
 
 setkey(Rtable,state)
 setkey(Ttable,state)
-d =   (deathRate / (1 - deathRate)) * r # Projected death rate per day        
+d =   (0.1 * deathRate / (1 - 0.1 * deathRate)) * r # Projected death rate per day        
 
 #d = (0.003 / (1 - 0.003)) * r # Projected death rate per day  
 
@@ -303,7 +303,7 @@ ggplot(UStotals[ variable %in% c(casesVariables,asymptomaticsVariables,cumulativ
   xlab("Date") + 
   ylab("Log(# of people)") + 
   ylim(0,NA) + 
-  #geom_point(size = 0.0001, aes(shape = projectionType)) + 
+  #geom_point(size = 0.0001, aes(shape = projectionType)) +   
   facet_wrap(~variableType) + 
   theme(axis.text.x = element_text(angle = 90))
 

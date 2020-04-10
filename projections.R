@@ -26,10 +26,15 @@ factor <- 1
 states <- fread("statesModified.csv")
 
 
+deathRateStates <- states[ , .SD[.N], by = state][ , .(deathRate = sum(na.omit(deaths)) / sum(na.omit(cases))), by = state]
 deathRate <- states[ , .SD[.N], by = state][ , sum(na.omit(deaths)) / sum(na.omit(cases))]
 
+setkey(deathRateStates,state)
+setkey(states,state)
 
+states <- deathRateStates[states]
 
+states[ , deathRate := (deathRate / (1-deathRate)) * r]
 
 states[ , impliedR_asymp_ma3 := (1/5) * Reduce(`+`, shift(impliedR_asymp,n = 0L:4L, type = "lag")), by = state]
 states[ , impliedT_asymp_ma3 := (1/5) * Reduce(`+`, shift(impliedT_asymp,n = 0L:4L, type = "lag")), by = state]
@@ -45,7 +50,7 @@ Rtable[ , necessaryFactor:= necessaryR / impliedR_last]
 
 setkey(Rtable,state)
 setkey(Ttable,state)
-d =   (0.1 * deathRate / (1 - 0.1 * deathRate)) * r # Projected death rate per day        
+d =   (deathRate / (1 - deathRate)) * r # Projected death rate per day        
 
 #d = (0.003 / (1 - 0.003)) * r # Projected death rate per day  
 
@@ -69,9 +74,10 @@ setnames(states,"POPESTIMATE2019","population")
 states[ , population := na.locf(population), by = state]
 states[ , STATE := na.locf(STATE), by = state]
 states[ , Area := na.locf(Area), by = state]
+states[ , deathRate := na.locf(deathRate), by = state]
 # Make projections
 
-project <- function(asymptomatics,cases,deaths,vulnerablePopulation,impliedT,factor)  {
+project <- function(asymptomatics,cases,deaths,vulnerablePopulation,deathRate,impliedT,factor)  {
 
   projectedNewAsymptomatics <- vector(mode = "numeric", length = length(asymptomatics))
   projectedNewCases <- vector(mode = "numeric", length = length(asymptomatics))
@@ -95,9 +101,9 @@ project <- function(asymptomatics,cases,deaths,vulnerablePopulation,impliedT,fac
     projectedAsymptomatics[i] <- projectedAsymptomatics[i-1] * (1-r - w) + projectedNewAsymptomatics[i]
     
     projectedNewCases[i] <- (w + (1-f) * factor * impliedT[i] * (projectedVulnerablePopulation[i-1])) * projectedAsymptomatics[i-1]
-    projectedCases[i] <- projectedCases[i-1] * (1-r) + projectedNewCases[i]
+    projectedCases[i] <- projectedCases[i-1] * (1-r) + projectedNewCases[i] - projectedNewDeaths[i-1]
     
-    projectedNewDeaths[i] <- d * projectedCases[i]
+    projectedNewDeaths[i] <- deathRate[i] * projectedCases[i]
     projectedDeaths[i] <- projectedDeaths[i-1] + projectedNewDeaths[i]
 
     projectedVulnerablePopulation[i] <- projectedVulnerablePopulation[i-1] - projectedNewAsymptomatics[i] - projectedNewCases[i]
@@ -108,11 +114,11 @@ project <- function(asymptomatics,cases,deaths,vulnerablePopulation,impliedT,fac
   
 }
 
-states[ , c("projectedNewAsymptomatics","projectedAsymptomatics","projectedNewCases","projectedCases","projectedNewDeaths","projectedDeaths","projectedVulnerablePopulation") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,impliedT_last,factor), by = state ]
-states[ , c("projectedNewAsymptomatics_10","projectedAsymptomatics_10","projectedNewCases_10","projectedCases_10","projectedNewDeaths_10","projectedDeaths_10","projectedVulnerablePopulation_10") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,impliedT_last,1), by = state ]
-states[ , c("projectedNewAsymptomatics_07","projectedAsymptomatics_07","projectedNewCases_07","projectedCases_07","projectedNewDeaths_07","projectedDeaths_07","projectedVulnerablePopulation_07") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,impliedT_last,0.7), by = state ]
-states[ , c("projectedNewAsymptomatics_05","projectedAsymptomatics_05","projectedNewCases_05","projectedCases_05","projectedNewDeaths_05","projectedDeaths_05","projectedVulnerablePopulation_05") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,impliedT_last,0.5), by = state ]
-states[ , c("projectedNewAsymptomatics_03","projectedAsymptomatics_03","projectedNewCases_03","projectedCases_03","projectedNewDeaths_03","projectedDeaths_03","projectedVulnerablePopulation_03") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,impliedT_last,0.3), by = state ]
+states[ , c("projectedNewAsymptomatics","projectedAsymptomatics","projectedNewCases","projectedCases","projectedNewDeaths","projectedDeaths","projectedVulnerablePopulation") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,deathRate,impliedT_last,factor), by = state ]
+states[ , c("projectedNewAsymptomatics_10","projectedAsymptomatics_10","projectedNewCases_10","projectedCases_10","projectedNewDeaths_10","projectedDeaths_10","projectedVulnerablePopulation_10") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,deathRate,impliedT_last,1), by = state ]
+states[ , c("projectedNewAsymptomatics_07","projectedAsymptomatics_07","projectedNewCases_07","projectedCases_07","projectedNewDeaths_07","projectedDeaths_07","projectedVulnerablePopulation_07") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,deathRate,impliedT_last,0.7), by = state ]
+states[ , c("projectedNewAsymptomatics_05","projectedAsymptomatics_05","projectedNewCases_05","projectedCases_05","projectedNewDeaths_05","projectedDeaths_05","projectedVulnerablePopulation_05") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,deathRate,impliedT_last,0.5), by = state ]
+states[ , c("projectedNewAsymptomatics_03","projectedAsymptomatics_03","projectedNewCases_03","projectedCases_03","projectedNewDeaths_03","projectedDeaths_03","projectedVulnerablePopulation_03") := project(asymptomatics,cases_ongoing,deaths,vulnerablePopulation,deathRate,impliedT_last,0.3), by = state ]
 
 
 # Make plots

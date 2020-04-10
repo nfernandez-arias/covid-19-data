@@ -21,6 +21,8 @@ w <- ((worsenFrac) / (1- worsenFrac)) * r
 
 states <- fread("us-states.csv")
 
+states <- states[fips <= 56]
+
 population <- fread("nst-est2019-alldata.csv")
 area <- fread("statesAreas.csv")
 
@@ -60,28 +62,22 @@ states[ , newCasesAdjusted := newCasesRaw / shift(currentCases), by = state]
 states[ , newAsymptomaticRaw := newCasesRaw * (f / (1-f)) ]
 
 states[states[ , .I[1], by = state]$V1, newAsymptomaticRaw := (f0 / (1-f0)) * cases]
+states[states[ , .I[1], by = state]$V1, newCasesRaw := cases]
+states[states[ , .I[1], by = state]$V1, newDeathsRaw := deaths]
 
-
-filter <- function(cases,newCases,newAsymp,deaths,newDeaths,idx) {
+filter <- function(cases,newCases,newAsymp,deaths,newDeaths) {
   
-  asymp <- vector(mode = "numeric", length = length(idx))
-  cases_ongoing <- vector(mode = "numeric", length = length(idx))
-  immune <- vector(mode = "numeric", length = length(idx))
-    
+  asymp <- vector(mode = "numeric", length = length(cases))
+  cases_ongoing <- vector(mode = "numeric", length = length(cases))
+  immune <- vector(mode = "numeric", length = length(cases))
+  
   asymp[1] <- newAsymp[1]
-  newCases[1] <- cases[1]
-  newDeaths[1] <- deaths[1]
   
-  for (i in 2:length(idx)) {
-    
-      discountFactor1 <- (1-r)^(i-idx[1:i-1])
-      discountFactor2 <- (1-w)^(i-idx[1:i-1])
-    
-      
+  for (i in 2:length(cases)) {
+  
       immune[i] <- immune[i-1] + r * (asymp[i-1] + cases_ongoing[i-1])  
       asymp[i] <- asymp[i-1] * (1 - r - w) + newAsymp[i]
       cases_ongoing[i] <- cases_ongoing[i-1] * (1-r) - newDeaths[i-1] + asymp[i-1] * w + newCases[i]
-
     
   }
   
@@ -89,7 +85,9 @@ filter <- function(cases,newCases,newAsymp,deaths,newDeaths,idx) {
 
 }
 
-states[ , c("asymptomatics","cases_ongoing","immune") := filter(cases,newCasesRaw,newAsymptomaticRaw,deaths,newDeathsRaw,index), by = state]
+
+
+states[ , c("asymptomatics","cases_ongoing","immune") := filter(cases,newCasesRaw,newAsymptomaticRaw,deaths,newDeathsRaw), by = state]
 
 states[ , vulnerablePopulation := POPESTIMATE2019 - asymptomatics - cases_ongoing - immune - deaths]
 

@@ -118,11 +118,13 @@ states[ , c("projectedNewAsymptomatics_03","projectedAsymptomatics_03","projecte
 # Make plots
 
 states[ projectedCases == 0, projectedCases := NA]
+states[ projectedNewCases == 0, projectedNewCases := NA]
 states[ projectedAsymptomatics == 0, projectedAsymptomatics := NA]
 states[ projectedDeaths == 0, projectedDeaths := NA]
 states[ projectedVulnerablePopulation == 0, projectedVulnerablePopulation := NA]
 
 states[ cases_ongoing == 0, cases_ongoing := NA]
+states[ newCasesRaw == 0, newCasesRaw := NA]
 states[ asymptomatics == 0, asymptomatics := NA]
 states[ deaths == 0, deaths := NA]
 states[, cumulativeInfected := population - vulnerablePopulation]
@@ -135,7 +137,7 @@ states[ , projectedCumulativeInected_03 := population - projectedVulnerablePopul
 
 #states[ projectedDeaths == 0.0, deaths := NA]
 
-UStotals <- states[ , .(projectedCases = sum(na.omit(projectedCases)),projectedAsymptomatics = sum(na.omit(projectedAsymptomatics)), projectedDeaths = sum(na.omit(projectedDeaths)),
+UStotals <- states[ , .(projectedCases = sum(na.omit(projectedCases)), projectedAsymptomatics = sum(na.omit(projectedAsymptomatics)), projectedDeaths = sum(na.omit(projectedDeaths)),
                         cases_ongoing = sum(na.omit(cases_ongoing)), asymptomatics = sum(na.omit(asymptomatics)), deaths = sum(na.omit(deaths))), by = date]
 
 setkey(UStotals,date)
@@ -171,6 +173,14 @@ ggplot(states, aes(x = date)) +
   theme(axis.text.x = element_text(angle = 90))
 
 ggsave("US_states_corona_cases_projections.pdf",plot = last_plot(), width = 18, height = 13, units = "in")
+
+ggplot(states, aes(x = date)) + 
+geom_line(aes(y = log(newCasesRaw), linetype = "New cases (actual, estimated)")) + 
+  geom_line(aes(y = log(projectedNewCases), linetype = "New cases (projected)")) + 
+  facet_wrap(~state) + 
+  theme(axis.text.x = element_text(angle = 90))
+
+ggsave("US_states_corona_newcases_projections.pdf",plot = last_plot(), width = 18, height = 13, units = "in")
 
 ggplot(states, aes(x = date)) + 
   geom_line(aes(y = log(cumulativeInfected), linetype = "Cumulative infected (actual, estimated)")) + 

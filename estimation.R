@@ -158,11 +158,11 @@ ggsave("US_states_corona_cases_impliedRasymp_adjusted.pdf",plot = last_plot(), w
 
 states[ , impliedT_asymp_standardized := (impliedT_asymp - mean(na.omit(impliedT_asymp)) ) / sd(na.omit(impliedT_asymp)), by = state]
 
-ggplot(data = states[], aes(x = date, y = impliedT_asymp_standardized, group = state)) +
+ggplot(data = states[], aes(x = date, y = impliedT_asymp * POPESTIMATE2019, group = state)) +
   geom_line() +
   facet_wrap(~state) +
-  labs(title = "Implied daily T") + 
-  
+  ylim(0,3) + 
+  labs(title = "Implied daily T * initial population (normalization factor for better displaying)") + 
   theme(axis.text.x = element_text(angle = 90))
 
 

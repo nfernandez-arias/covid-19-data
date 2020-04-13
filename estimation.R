@@ -162,7 +162,8 @@ ggplot(data = states[], aes(x = date, y = impliedT_asymp * POPESTIMATE2019, grou
   geom_line() +
   facet_wrap(~state) +
   ylim(0,3) + 
-  labs(title = "Implied daily T * initial population (normalization factor for better displaying)") + 
+  labs(title = "Implied daily T * initial population (normalization factor for better displaying)",
+       subtitle = "For each state, this quantity is held constant in projections") + 
   theme(axis.text.x = element_text(angle = 90))
 
 

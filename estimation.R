@@ -170,7 +170,7 @@ ggplot(data = states[], aes(x = date, y = impliedT_asymp * POPESTIMATE2019, grou
 ggsave("US_states_corona_cases_impliedTasymp_adjusted.pdf",plot = last_plot(), width = 18, height = 13, units = "in")
 
 
-ggplot(data = states[], aes(x = date, y = log(deaths), group = state)) +
+  ggplot(data = states[], aes(x = date, y = log(deaths), group = state)) +
   geom_line() +
   facet_wrap(~state) +
   labs(title = "Coronavirus deaths by state") + 

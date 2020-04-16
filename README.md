@@ -28,7 +28,7 @@ The model assumes the following:
 2. 70% of new cases are **A** 
 3. Each day, 10% of **A** and **I** transition to **R**
     - Given *r_t* people infected per day, this implies 10 times *r_t* people infected per typical infected person
-4. Each day, 2% of **A** transition to **I**
+4. Each day, 2.5% of **A** transition to **I**
     - This means 20% of **A** eventually become **I**
 6. Each day, a  fraction *d_t* of **I** die
     - The parameter *d_t* can vary freely by day

@@ -1,3 +1,39 @@
+# Simple SIR model
+
+This repo contains the code and results for a simple discrete-time SIR model.
+
+- Estimation code is in `estimation.R`
+
+- Projections code is in `projection.R`
+
+- Plots are pdfs in the main folder
+
+## Model
+
+The model is a simple SIR model with the following states:
+
+- Susceptible
+- Infected and diagnosed
+- Asymptomatic and undiagnosed
+- Recovered (cured or dead)
+
+
+assumes the following:
+
+1. 70% of new cases are asymptomatic at first
+2. Reported new cases are symptomatic
+3. Asymptomatic cases do not die
+4. Some asymptomatic cases can transition into symptomatic-diagnosed
+2. Goodbye
+
+## Estimation
+
+## Projection
+
+## Plots
+
+
+
 # Coronavirus (Covid-19) Data in the United States
 
 [ [U.S. Data](us.csv) ([Raw CSV](https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv)) | [U.S. State-Level Data](us-states.csv) ([Raw CSV](https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv)) | [U.S. County-Level Data](us-counties.csv) ([Raw CSV](https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv)) ]

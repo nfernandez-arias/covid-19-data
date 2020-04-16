@@ -1,3 +1,5 @@
+(writeup is in progress.)
+
 # Simple SIR model
 
 This repo contains the code and results for a simple discrete-time SIR model.
@@ -10,23 +12,34 @@ This repo contains the code and results for a simple discrete-time SIR model.
 
 ## Model
 
-The model is a simple SIR model with the following states:
+The model is a simple SIARD model with the following states:
 
-- Susceptible
-- Infected and diagnosed
-- Asymptomatic and undiagnosed
-- Recovered (cured or dead)
+- Susceptible (S)
+- Infected and diagnosed (I)
+- Asymptomatic and undiagnosed (A)
+- Recovered (R)
+- Dead (D)
 
+The model assumes the following:
 
-assumes the following:
-
-1. 70% of new cases are asymptomatic at first
-2. Reported new cases are symptomatic
-3. Asymptomatic cases do not die
-4. Some asymptomatic cases can transition into symptomatic-diagnosed
-2. Goodbye
+1. Every day, each **A** case infects *r_t* individuals in state **S**
+    - The parameter *r_t* can vary freely by day
+    - **I** cases are diagnosed and therefore quarantining; they do not spread the disease
+2. 70% of new cases are **A** 
+3. Each day, 10% of **A** and **I** transition to **R**
+    - Given *r_t* people infected per day, this implies 10 times *r_t* people infected per typical infected person
+4. Each day, 2% of **A** transition to **I**
+    - This means 20% of **A** eventually become **I**
+6. Each day, a  fraction *d_t* of **I** die
+    - The parameter *d_t* can vary freely by day
 
 ## Estimation
+
+I perform a state-by-state estimation of the model. This implicitly assumes that people do not travel across state lines.
+
+In my estimation, **I** corresponds to ongoing diagnosed cases, **S** corresponds to people who have not yet been infected with the disease, and **D** corresponds to deaths, which the model is able to match exactly because I allow **d_t** to vary day-by-day (i.e., the death rate is estimated as a residual so that the model fits). I do not observe **A** or **R** directly so I can only infer them, and therefore **I** and **S**, by using the model's assumptions. 
+
+In each period, the number of new **A** cases is computed using the data on new **I** cases and the model assumption that 70% of new cases are initially **A**. 
 
 ## Projection
 

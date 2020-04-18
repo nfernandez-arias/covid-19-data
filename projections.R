@@ -216,8 +216,8 @@ ggsave("US_states_corona_deaths_projections.pdf",plot = last_plot(), width = 18,
 
 # Plot necessary factors
 ggplot(Rtable[ , .(necessaryFactor)] , aes(x = necessaryFactor)) + 
-  geom_histogram(bins = 50) + 
-  stat_density(geom = "line")
+  geom_histogram(bins = 50) +
+  stat_density(geom = "line", color = "black", linetype = "dashed", size = 1)
 
 ggsave("necessaryR_adjustment.pdf", plot = last_plot(), width = 10, height = 6, units = "in")
 

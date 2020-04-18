@@ -9,6 +9,8 @@ This repo contains the code and results for a simple discrete-time SIR model.
 - Projections code is in `projection.R`
 
 - Plots are pdfs in the main folder
+    - Plots labeled "Cases" refer to diagnosed cases. 
+    - Plots labeled "Asymptomatics" refer to undiagnosed cases (assumed to be asymptomatic)
 
 ## Model
 

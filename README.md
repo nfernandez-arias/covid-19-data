@@ -9,8 +9,8 @@ This repo contains the code and results for a simple discrete-time SIR model.
 - Projections code is in `projection.R`
 
 - Plots are pdfs in the main folder
-    - Plots labeled "Cases" refer to diagnosed cases. 
-    - Plots labeled "Asymptomatics" refer to undiagnosed cases (assumed to be asymptomatic)
+    - Plots labeled "Cases" refer to diagnosed cases (i.e., **I** in the model)
+    - Plots labeled "Asymptomatics" refer to undiagnosed cases (assumed to be asymptomatic) (i.e. **A** in the model)
 
 ## Model
 
@@ -41,7 +41,11 @@ I perform a state-by-state estimation of the model. This implicitly assumes that
 
 In my estimation, **I** corresponds to ongoing diagnosed cases, **S** corresponds to people who have not yet been infected with the disease, and **D** corresponds to deaths, which the model is able to match exactly because I allow **d_t** to vary day-by-day (i.e., the death rate is estimated as a residual so that the model fits). I do not observe **A** or **R** directly so I can only infer them, and therefore **I** and **S**, by using the model's assumptions. 
 
-In each period, the number of new **A** cases is computed using the data on new **I** cases and the model assumption that 70% of new cases are initially **A**. 
+In each period, the number of new **A** cases is computed using the data on new **I** cases and the model assumption that 70% of new cases are initially **A**. The numbers of **I** and **A** cases are updated to take into account these new cases, as well as a recovery rate *r = 10%* and subtracting observed deaths from **I** (and these are added into the category **R**). The model then proceeds in this fashion for the entire history of each state. 
+
+This yields an estimate of the population of **A**, **I**, **R**, **D** at each point in time, given the parameters *r = 10%* and that 70% of new cases are asymptomatic. Then I can calculate **S** by subtracting the above from the initial state population. Finally, in each period I calculate the ratio of (total new **A** and **I** cases) over (stock of **A** cases at end of previous period) to calculate the number of new infections per spreader (recall, I assume only **A** spread) per day. This number is plotted in the "impliedR" graph.
+
+To convert this into a metric that can be held constant in projections, I then divide this rate of infection further by **S** in each state at each point in time. That is, it is the number of new infections per spreader, per day, **PER SUSCEPTIBLE PERSON**. This number is plotted, for each state over time, in the "impliedT" graph, since it is a measure of some combination of how long people spend outside of their home each day and where they go, the population density, local customs, lockdown protocols, etc. It is this number that I hold constant in the projections for each state (described in the next section).
 
 ## Projection
 

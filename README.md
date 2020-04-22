@@ -1,5 +1,3 @@
-(writeup is in progress.)
-
 # Simple SIR model
 
 This repo contains the code and results for a simple discrete-time SIR model.
@@ -14,7 +12,7 @@ This repo contains the code and results for a simple discrete-time SIR model.
 
 ## Model
 
-The model is a simple SIARD model with the following states:
+The model is a simple modification of a SIR model. At each point in time, individuals can be in any of the following states:
 
 - Susceptible (S)
 - Infected and diagnosed (I)

@@ -25,7 +25,7 @@ The model assumes the following:
 1. Every day, each **A** case infects *r_t* individuals in state **S**
     - The parameter *r_t* can vary freely by day
     - **I** cases are diagnosed and therefore quarantining; they do not spread the disease
-2. 70% of new cases are **A** 
+2. 90% of new cases are **A** (also 90% of initial cases assumed **A**). This number is based on https://www.reuters.com/article/us-health-coronavirus-usa-new-york/new-york-test-of-3000-people-finds-14-with-coronavirus-antibodies-idUSKCN2252WN, which finds 14% with coronavirus, compared to approx 1.4% documented cases.
 3. Each day, 10% of **A** and **I** transition to **R**
     - Given *r_t* people infected per day, this implies 10 times *r_t* people infected per typical infected person
 4. Each day, 2.5% of **A** transition to **I**

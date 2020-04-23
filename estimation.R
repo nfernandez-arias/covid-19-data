@@ -11,11 +11,11 @@ setwd("~/nfernand@princeton.edu/PhD - Thesis/Research/covid-19-data")
 
 #  Parameters for state space estimation of asymptomatic daily R
 
-f0 <- 0.95  # initial fraction asymptomatic
-f <- 0.7 # fraction of new cases that are asymptomatic
+f0 <- 0.9  # initial fraction asymptomatic
+f <- 0.9 # fraction of new cases that are asymptomatic
 r <- 0.1 # fraction of cases that resolve each day
 
-worsenFrac <- 0.2 # fraction of asymnptomatic cases that become symptomatic
+worsenFrac <- 0.2 # fraction of asymnptomatic cases that eventually become symptomatic
 w <- ((worsenFrac) / (1- worsenFrac)) * r
 
 

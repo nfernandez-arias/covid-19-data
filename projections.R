@@ -12,8 +12,8 @@ setwd("~/nfernand@princeton.edu/PhD - Thesis/Research/covid-19-data")
 complete <- tidyr::complete
 na.locf <- zoo::na.locf
 
-f0 <- 0.95  # initial fraction asymptomatic    
-f <- 0.7 # fraction of new cases that are asymptomatic
+f0 <- 0.9  # initial fraction asymptomatic    
+f <- 0.9 # fraction of new cases that are asymptomatic
 r <- 0.1 # fraction of cases that resolve each day
 
 worsenFrac <- 0.2 # fraction of asymnptomatic cases that become symptomatic

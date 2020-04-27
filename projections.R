@@ -318,6 +318,7 @@ ggplot(UStotals[ variable %in% c(casesVariables,asymptomaticsVariables,cumulativ
        subtitle = "Four lockdown scenarios, logarithmic terms") + 
   xlab("Date") + 
   ylab("Log(# of people)") + 
+  scale_y_continuous(trans = "exp") + 
   ylim(0,NA) + 
   #geom_point(size = 0.0001, aes(shape = projectionType)) +   
   facet_wrap(~variableType) + 

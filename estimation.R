@@ -179,19 +179,6 @@ ggplot(data = states[], aes(x = date, y = 1 - 1/(impliedT_asymp * POPESTIMATE201
 
 ggsave("US_states_corona_cases_fractionInfectedAtPeak.pdf",plot = last_plot(), width = 18, height = 13, units = "in")
 
-ggplot(data = states[], aes(x = date, y = impliedT_asymp * POPESTIMATE2019 / (r + w), group = state)) +
-  geom_line() +
-  facet_wrap(~state) +
-  ylim(0,10) + 
-  labs(title = "Implied Beta",
-       subtitle = "For each state, this quantity is held constant in projections") + 
-  theme(axis.text.x = element_text(angle = 90))
-
-
-ggsave("US_states_corona_cases_impliedTasymp_adjusted.pdf",plot = last_plot(), width = 18, height = 13, units = "in")
-
-
-
 
   ggplot(data = states[], aes(x = date, y = log(deaths), group = state)) +
   geom_line() +

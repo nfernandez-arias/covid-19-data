@@ -91,9 +91,9 @@ states[ , c("asymptomatics","cases_ongoing","immune") := filter(cases,newCasesRa
 
 states[ , vulnerablePopulation := POPESTIMATE2019 - asymptomatics - cases_ongoing - immune - deaths]
 
-states[ , impliedR_asymp := newAsymptomaticRaw / (f * shift(asymptomatics)), by = state]
+states[ , impliedR_asymp := (newAsymptomaticRaw + newCasesRaw - w * shift(asymptomatics)) / (f * shift(asymptomatics)), by = state]
 
-states[ , impliedT_asymp := newAsymptomaticRaw / (f * shift(vulnerablePopulation) * shift(asymptomatics)), by = state]
+states[ , impliedT_asymp := (newAsymptomaticRaw + newCasesRaw - w * shift(asymptomatics)) / (f * shift(vulnerablePopulation) * shift(asymptomatics)), by = state]
 
 fwrite(states,"statesModified.csv")
 

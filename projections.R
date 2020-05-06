@@ -34,7 +34,7 @@ setkey(states,state)
 
 states <- deathRateStates[states]
 
-states[ , deathRate := (0.5 * deathRate / (1- 0.5 * deathRate)) * r]
+states[ , deathRate := (deathRate / (1- deathRate)) * r]
 
 states[ , impliedR_asymp_ma3 := (1/5) * Reduce(`+`, shift(impliedR_asymp,n = 0L:4L, type = "lag")), by = state]
 states[ , impliedT_asymp_ma3 := (1/5) * Reduce(`+`, shift(impliedT_asymp,n = 0L:4L, type = "lag")), by = state]
@@ -50,9 +50,6 @@ Rtable[ , necessaryFactor:= necessaryR / impliedR_last]
 
 setkey(Rtable,state)
 setkey(Ttable,state)
-d =   (deathRate / (1 - deathRate)) * r # Projected death rate per day        
-
-#d = (0.003 / (1 - 0.003)) * r # Projected death rate per day  
 
 states[ , date := as.Date(date)]
 

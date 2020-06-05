@@ -36,12 +36,11 @@ states <- deathRateStates[states]
 
 states[ , deathRate := (deathRate / (1- deathRate)) * r]
 
-states[ , impliedR_asymp_ma3 := (1/5) * Reduce(`+`, shift(impliedR_asymp,n = 0L:4L, type = "lag")), by = state]
 states[ , impliedT_asymp_ma3 := (1/5) * Reduce(`+`, shift(impliedT_asymp,n = 0L:4L, type = "lag")), by = state]
-Rtable <- states[ , .SD[.N], by = state][ , .(state,impliedR_asymp_ma3)]
+Rtable <- states[ , .SD[.N], by = state][ , .(state,impliedR0_asymp_ma)]
 Ttable <- states[ , .SD[.N], by = state][ , .(state,impliedT_asymp_ma3)]
 
-setnames(Rtable,"impliedR_asymp_ma3","impliedR_last")
+setnames(Rtable,"impliedR0_asymp_ma","impliedR_last")
 setnames(Ttable,"impliedT_asymp_ma3","impliedT_last")
 
 necessaryR <- r / f

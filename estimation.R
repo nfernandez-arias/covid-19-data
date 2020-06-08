@@ -65,7 +65,7 @@ states[states[ , .I[1], by = state]$V1, newAsymptomaticRaw := (f0 / (1-f0)) * ca
 states[states[ , .I[1], by = state]$V1, newCasesRaw := cases]
 states[states[ , .I[1], by = state]$V1, newDeathsRaw := deaths]
 
-filter <- function(cases,newCases,newAsymp,deaths,newDeaths) {
+filter <- function(cases,newCases,newAsymp,deaths,newDeaths,fracHistory) {
   
   asymp <- vector(mode = "numeric", length = length(cases))
   cases_ongoing <- vector(mode = "numeric", length = length(cases))
@@ -73,7 +73,7 @@ filter <- function(cases,newCases,newAsymp,deaths,newDeaths) {
   
   asymp[1] <- newAsymp[1]
   
-  for (i in 2:length(cases)) {
+  for (i in 2:ceiling(fracHistory*length(cases))) {
   
       immune[i] <- immune[i-1] + r * (asymp[i-1] + cases_ongoing[i-1])  
       asymp[i] <- asymp[i-1] * (1 - r - w) + newAsymp[i]
@@ -85,9 +85,14 @@ filter <- function(cases,newCases,newAsymp,deaths,newDeaths) {
 
 }
 
+# Do for all time
+#index = length(states$cases)
+
+# Do for a certain index
+fracHistory <- 0.5
 
 
-states[ , c("asymptomatics","cases_ongoing","immune") := filter(cases,newCasesRaw,newAsymptomaticRaw,deaths,newDeathsRaw), by = state]
+states[ , c("asymptomatics","cases_ongoing","immune") := filter(cases,newCasesRaw,newAsymptomaticRaw,deaths,newDeathsRaw,fracHistory), by = state]
 
 states[ , vulnerablePopulation := POPESTIMATE2019 - asymptomatics - cases_ongoing - immune - deaths]
 

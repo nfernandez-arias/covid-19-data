@@ -3,4 +3,6 @@
     source("estimation.R")
     
     source("projections.R")
+    
+    source("projectionTest.R")
                                     

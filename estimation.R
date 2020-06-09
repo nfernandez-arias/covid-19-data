@@ -89,7 +89,7 @@ filter <- function(cases,newCases,newAsymp,deaths,newDeaths,fracHistory) {
 #index = length(states$cases)
 
 # Do for a certain index
-fracHistory <- 0.5
+fracHistory <- 1
 
 
 states[ , c("asymptomatics","cases_ongoing","immune") := filter(cases,newCasesRaw,newAsymptomaticRaw,deaths,newDeathsRaw,fracHistory), by = state]

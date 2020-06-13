@@ -7,8 +7,6 @@ library(ggthemr)
 ggthemr("flat")# Set theme -- controls all plots
 library(gridExtra)
 
-setwd("~/nfernand@princeton.edu/PhD - Thesis/Research/covid-19-data")
-
 #  Parameters for state space estimation of asymptomatic daily R
 
 f0 <- 0.9  # initial fraction asymptomatic

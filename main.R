@@ -1,4 +1,4 @@
-setwd("~/nfernand@princeton.edu/PhD - Thesis/Research/covid-19-data")
+setwd("~/Insync/nfernand@princeton.edu/Google Drive/PhD - Thesis/Research/covid-19-data")
 
 source("estimation.R")
 

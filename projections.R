@@ -7,8 +7,6 @@ library(ggthemr)
 ggthemr("flat")# Set theme -- controls all plots
 library(gridExtra)
 
-setwd("~/nfernand@princeton.edu/PhD - Thesis/Research/covid-19-data")
-
 complete <- tidyr::complete
 na.locf <- zoo::na.locf
 

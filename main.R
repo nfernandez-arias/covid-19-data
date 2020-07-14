@@ -4,7 +4,7 @@ source("estimation.R")
 
 source("projections.R")
 
-max(UStotals[variable == "projectedDeaths"]$value, na.rm = TRUE)
+max(UStotals[variable == "projectedDeaths_10"]$value, na.rm = TRUE)
 max(UStotals[variable == "deaths"]$value, na.rm = TRUE)
 
 #source("projectionTest.R")

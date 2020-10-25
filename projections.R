@@ -23,8 +23,8 @@ factor <- 1
 
 states <- fread("statesModified.csv")
 
+deathRateStates <- states[ , tail(.SD, 10L), by = state][ , .(state = state, deathRate = mean(na.omit(newDeathsRaw / cases))), by = state]
 
-deathRateStates <- states[ , .SD[.N], by = state][ , .(deathRate = sum(na.omit(deaths)) / sum(na.omit(cases))), by = state]
 deathRate <- states[ , .SD[.N], by = state][ , sum(na.omit(deaths)) / sum(na.omit(cases))]
 
 setkey(deathRateStates,state)
@@ -32,7 +32,7 @@ setkey(states,state)
 
 states <- deathRateStates[states]
 
-states[ , deathRate := (deathRate / (1- deathRate)) * r]
+#states[ , deathRate := (deathRate / (1- deathRate)) * r]
 
 states[ , impliedT_asymp_ma3 := (1/5) * Reduce(`+`, shift(impliedT_asymp,n = 0L:4L, type = "lag")), by = state]
 Rtable <- states[ , .SD[.N], by = state][ , .(state,impliedR0_asymp_ma)]

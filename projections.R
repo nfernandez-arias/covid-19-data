@@ -23,7 +23,7 @@ factor <- 1
 
 states <- fread("statesModified.csv")
 
-deathRateStates <- states[ , tail(.SD, 10L), by = state][ , .(state = state, deathRate = mean(na.omit(newDeathsRaw / cases))), by = state]
+deathRateStates <- states[ , tail(.SD, 20L), by = state][ , .(state = state, deathRate = mean(na.omit(newDeathsRaw / cases))), by = state]
 
 deathRate <- states[ , .SD[.N], by = state][ , sum(na.omit(deaths)) / sum(na.omit(cases))]
 

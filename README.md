@@ -1,6 +1,8 @@
-# Simple SIR model
+# SIARD model
 
-This repo contains the code and results for a simple discrete-time SIR model.
+This repo contains the code and results for a simple discrete-time SIARD model.
+
+## Contents
 
 - Estimation code is in `estimation.R`
 

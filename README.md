@@ -12,7 +12,7 @@ This repo contains the code and results for a simple discrete-time SIR model.
 
 ## Model
 
-The model is a simple modification of a SIR model. At each point in time, individuals can be in any of the following states:
+The model is a simple modification of a SIARD model. At each point in time, individuals can be in any of the following states:
 
 - Susceptible (S)
 - Infected and diagnosed (I)
@@ -22,16 +22,18 @@ The model is a simple modification of a SIR model. At each point in time, indivi
 
 The model assumes the following:
 
-1. Every day, each **A** case infects *r_t* individuals in state **S**
-    - The parameter *r_t* can vary freely by day
-    - **I** cases are diagnosed and therefore quarantining; they do not spread the disease
-2. 90% of new cases are **A** (also 90% of initial cases assumed **A**). This number is based on https://www.reuters.com/article/us-health-coronavirus-usa-new-york/new-york-test-of-3000-people-finds-14-with-coronavirus-antibodies-idUSKCN2252WN, which finds 14% with coronavirus, compared to approx 1.4% documented cases.
-3. Each day, 10% of **A** and **I** transition to **R**
-    - Given *r_t* people infected per day, this implies 10 times *r_t* people infected per typical infected person
-4. Each day, 2.5% of **A** transition to **I**
-    - This means 20% of **A** eventually become **I**
-6. Each day, a  fraction *d_t* of **I** die
-    - The parameter *d_t* can vary freely by day
+1. Every day, each **A** case infects *r_t* individuals in state **S**.
+    - The parameter *r_t* can vary freely by day.
+    - **I** cases are diagnosed and therefore quarantining; they do not spread the disease.
+    - **A** cases are undiagnosed and therefore asymptomatic; they do not die from the disease.
+2. 90% of new cases are **A** (also 90% of initial cases assumed **A**). This number is based on https://www.reuters.com/article/us-health-coronavirus-usa-new-york/new-york-test-of-3000-people-finds-14-with-coronavirus-antibodies-idUSKCN2252WN, which finds 14% with coronavirus, compared to approx 1.4% documented cases. **Note: I have updated the first parameter to 70%** because otherwise the model breaks down as it finds more cases than population in some states (in particular, North Dakota). A better correction would be for this parameter to decline over time, reflecting better testing. Eventually I will put this in.
+3. Each day, 10% of **A** and **I** transition to **R**.
+    - Given *r_t* people infected per day, this implies 10 times *r_t* people infected per typical infected person.
+4. Each day, 2.5% of **A** transition to **I**.
+    - This means 20% of **A** eventually become **I**.
+    - This means the model can to some degree accomodate the possibility that some cases that start out asymptomatic (and hence spread) can eventually become symptomatic and lead to death
+    - However, the model cannot separately set (1) the fraction of **A** who become **I** and (2) the average delay with which this happens. These are constrained: given an average delay, the fraction of **A** who become **I** is determined by the assumption of a Poisson process and the recovery rate. 
+6. Each day, a  fraction *d_t* of **I** die and enter state **D**.
 
 ## Estimation
 
